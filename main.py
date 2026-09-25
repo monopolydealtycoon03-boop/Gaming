@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template_string, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import random
@@ -5,7 +6,8 @@ import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
-socketio = SocketIO(app, cors_allowed_origins="*")
+# FIX 1 & 2: Added async_mode="threading" and ensured cors_allowed_origins="*"
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # ==========================================
 # 1. HTML & JAVASCRIPT FRONTEND (LUXURY UI + SFX & ANIMATIONS + MOBILE TOUCH)
@@ -1705,6 +1707,7 @@ class GameRoom:
                                     for b in bot["buildings"][col]:
                                         if b['name'] == 'House': b_bonus += 3
                                         elif b['name'] == 'Hotel': b_bonus += 4
+                                        
                                 amt += b_bonus
                                 
                                 if amt > best_rent_amt:
@@ -2420,4 +2423,6 @@ def broadcast_room_state(room_id):
 
 if __name__ == '__main__':
     socketio.start_background_task(background_turn_timer)
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    # FIX 3: Dynamic Port binding for Cloud platforms (Heroku, Render, etc.)
+    port = int(os.environ.get('PORT', 5000))
+    socketio.run(app, debug=False, host='0.0.0.0', port=port)
