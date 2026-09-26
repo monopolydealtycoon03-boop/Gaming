@@ -16,6 +16,9 @@ HTML_PAGE = """
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- Google Site Verification Tag Added Here -->
+    <meta name="google-site-verification" content="2lImF3UC8FS6AiCfjKVgEJR9o1-dzVGpH9Q9_8zWDHc" />
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Monopoly Deal - Luxury Card Game</title>
     <!-- Tailwind CSS CDN -->
