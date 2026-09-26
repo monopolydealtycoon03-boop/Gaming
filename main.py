@@ -6,7 +6,6 @@ import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
-# FIX 1 & 2: Added async_mode="threading" and ensured cors_allowed_origins="*"
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # ==========================================
@@ -58,7 +57,7 @@ HTML_PAGE = """
             color: #f8fafc;
             overflow-x: hidden;
             user-select: none;
-            -webkit-user-select: none; /* iOS Safari Safari */
+            -webkit-user-select: none;
         }
 
         /* Custom Scrollbars */
@@ -74,8 +73,8 @@ HTML_PAGE = """
         .gold-text-glow { text-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
 
         /* ==============================
-           CARD ANIMATIONS ENGINE
-           ============================== */
+            CARD ANIMATIONS ENGINE
+            ============================== */
         @keyframes dealIn {
             0% { transform: translateY(-80px) scale(0.6) rotateX(-90deg); opacity: 0; }
             100% { transform: translateY(0) scale(1) rotateX(0); opacity: 1; }
@@ -121,7 +120,7 @@ HTML_PAGE = """
             flex-shrink: 0;
             display: inline-block;
             z-index: 10;
-            touch-action: pan-x; /* Allow horizontal scroll, block vertical during drag on some devices */
+            touch-action: pan-x;
         }
         
         .game-card:active { cursor: grabbing; }
@@ -143,7 +142,7 @@ HTML_PAGE = """
             width: 100%; height: 100%; border-radius: 6px; padding: 6px;
             display: flex; flex-direction: column; justify-content: space-between;
             box-sizing: border-box; background: #1c1813; border: 2px solid #d4af37;
-            pointer-events: none; /* Helps with drag drop events */
+            pointer-events: none;
         }
 
         .prop-Brown { background-color: #795548; color: #fff; }
@@ -177,7 +176,8 @@ HTML_PAGE = """
         }
         .active-turn-indicator { animation: activePulse 2s infinite; }
         
-        .modal-btn { @apply w-full py-2.5 bg-cardbg hover:bg-gold-900 border border-gold-500/50 hover:border-gold-500 text-white font-bold rounded-lg transition-colors text-sm; }
+        .modal-btn { width: 100%; padding: 0.625rem; background-color: #14110e; border: 1px solid rgba(212, 175, 55, 0.5); color: white; font-weight: bold; border-radius: 0.5rem; transition: background-color 0.2s, border-color 0.2s; font-size: 0.875rem; text-align: center; }
+        .modal-btn:hover { background-color: #855812; border-color: #d4af37; }
     </style>
 </head>
 <body class="bg-darkbg min-h-screen text-slate-100 flex flex-col justify-between">
@@ -235,7 +235,7 @@ HTML_PAGE = """
                     </div>
                 </div>
 
-                <div class="relative h-80 flex items-center justify-center hidden lg:flex">
+                <div class="relative h-80 items-center justify-center hidden lg:flex">
                     <div class="game-card absolute -rotate-12 -translate-x-12 z-10 border-gold-500"><div class="card-inner action-bg"><div class="color-strip bg-gold-500 text-black">ACTION</div><div class="text-center my-auto font-cinzel text-xs font-bold text-gold-300">DEAL BREAKER</div></div></div>
                     <div class="game-card absolute rotate-0 z-20 scale-110"><div class="card-inner prop-Dark-Blue"><div class="color-strip prop-Dark-Blue border border-white/20">DARK BLUE</div><div class="text-center my-auto font-cinzel text-xs font-bold text-white">BOARDWALK</div></div></div>
                     <div class="game-card absolute rotate-12 translate-x-12 z-10"><div class="card-inner money-bg"><div class="color-strip bg-emerald-600 text-white">CASH</div><div class="text-center my-auto font-cinzel text-xl font-extrabold text-emerald-400">10M</div></div></div>
@@ -416,7 +416,7 @@ HTML_PAGE = """
             alert: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alert-alarm-1005.mp3'),
             deal: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-fast-small-sweep-transition-166.mp3'),
             error: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-game-show-wrong-answer-buzz-950.mp3'),
-            pop: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3') // Chat sound
+            pop: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3')
         };
 
         function playSound(type) {
@@ -445,7 +445,7 @@ HTML_PAGE = """
         let myPropertiesData = [];
         
         let activeModalOpponentCallback = null;
-        let draggedCardIndex = -1; // Added for Drag & Drop Feature
+        let draggedCardIndex = -1;
 
         const setSizes = { 'Brown': 2, 'Light Blue': 3, 'Pink': 3, 'Orange': 3, 'Red': 3, 'Yellow': 3, 'Green': 3, 'Dark Blue': 2, 'Railroad': 4, 'Utility': 2 };
         const allColors = ['Brown', 'Light Blue', 'Pink', 'Orange', 'Red', 'Yellow', 'Green', 'Dark Blue', 'Railroad', 'Utility'];
@@ -519,7 +519,6 @@ HTML_PAGE = """
                 ? `<span class="text-[9px] text-emerald-500/70 mb-0.5 px-1">You</span>` 
                 : `<span class="text-[9px] text-gold-500/70 mb-0.5 px-1">${escapeHTML(data.sender)}</span>`;
             
-            // Check if message is a single emote
             const emotesList = ['😠', '💸', '🤝', '😭', '😈'];
             const isEmote = emotesList.includes(data.message.trim());
             
@@ -547,7 +546,6 @@ HTML_PAGE = """
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', idx);
             
-            // Show Drop Zones with a slight delay
             setTimeout(() => {
                 document.getElementById('bank-dropzone').classList.remove('hidden');
                 document.getElementById('property-dropzone').classList.remove('hidden');
@@ -585,34 +583,29 @@ HTML_PAGE = """
             let touchX = e.touches[0].clientX;
             let touchY = e.touches[0].clientY;
             
-            // If moved more than 10px, consider it a drag (not a tap/click)
             if (!isTouchDragging && (Math.abs(touchX - touchStartX) > 10 || Math.abs(touchY - touchStartY) > 10)) {
                 isTouchDragging = true;
-                draggedCardIndex = touchDragIndex; // sync index for handleDrop
+                draggedCardIndex = touchDragIndex;
                 
-                // Show Dropzones
                 document.getElementById('bank-dropzone').classList.remove('hidden');
                 document.getElementById('property-dropzone').classList.remove('hidden');
                 
-                // Create Ghost element for visual feedback
                 let originalCard = e.currentTarget;
                 touchDragClone = originalCard.cloneNode(true);
                 touchDragClone.style.position = 'fixed';
                 touchDragClone.style.zIndex = '9999';
                 touchDragClone.style.opacity = '0.85';
-                touchDragClone.style.pointerEvents = 'none'; // Crucial for elementFromPoint finding dropzones!
+                touchDragClone.style.pointerEvents = 'none';
                 touchDragClone.style.transform = 'scale(1.05)';
                 document.body.appendChild(touchDragClone);
             }
 
             if (isTouchDragging) {
-                e.preventDefault(); // Stop page scrolling natively during drag
+                e.preventDefault();
                 
-                // Move ghost element
-                touchDragClone.style.left = (touchX - 50) + 'px'; // Center visually
+                touchDragClone.style.left = (touchX - 50) + 'px';
                 touchDragClone.style.top = (touchY - 72) + 'px';  
 
-                // Visual Hit Detection
                 let elUnderFinger = document.elementFromPoint(touchX, touchY);
                 let bankDz = document.getElementById('bank-dropzone');
                 let propDz = document.getElementById('property-dropzone');
@@ -632,12 +625,11 @@ HTML_PAGE = """
 
         function handleTouchEnd(e) {
             if (!isTouchDragging) {
-                // If it was just a tap without dragging, let standard click logic happen
                 touchDragIndex = -1;
                 return;
             }
             
-            e.preventDefault(); // Prevent ghost click
+            e.preventDefault();
             
             let touchX = e.changedTouches[0].clientX;
             let touchY = e.changedTouches[0].clientY;
@@ -646,13 +638,11 @@ HTML_PAGE = """
             let bankDz = document.getElementById('bank-dropzone');
             let propDz = document.getElementById('property-dropzone');
             
-            // Cleanup UI
             bankDz.classList.add('hidden');
             propDz.classList.add('hidden');
             bankDz.classList.remove('bg-emerald-900/80');
             propDz.classList.remove('bg-gold-900/80');
 
-            // Trigger Drop logic if dropped on valid zone
             if (elUnderFinger) {
                 if (elUnderFinger.id === 'bank-dropzone' || bankDz.contains(elUnderFinger)) {
                     handleDrop({ preventDefault: () => {} }, 'bank');
@@ -665,7 +655,6 @@ HTML_PAGE = """
                 draggedCardIndex = -1;
             }
             
-            // Remove Ghost Element
             if (touchDragClone) {
                 touchDragClone.remove();
                 touchDragClone = null;
@@ -677,7 +666,6 @@ HTML_PAGE = """
         function handleDrop(e, type) {
             if (e.preventDefault) e.preventDefault();
             
-            // Reset Dropzones UI
             document.getElementById('bank-dropzone').classList.add('hidden');
             document.getElementById('property-dropzone').classList.add('hidden');
             document.getElementById('bank-dropzone').classList.remove('bg-emerald-900/80');
@@ -770,13 +758,10 @@ HTML_PAGE = """
             if (clickable) {
                 cardEl.onclick = () => handleCardClick(index);
                 
-                // Add Drag & Drop (Desktop & Mobile Touch)
                 if (!isDiscardMode) {
                     cardEl.draggable = true;
-                    // Desktop
                     cardEl.ondragstart = (e) => handleDragStart(e, index);
                     cardEl.ondragend = handleDragEnd;
-                    // Mobile Touch 
                     cardEl.addEventListener('touchstart', (e) => handleTouchStart(e, index), { passive: false });
                     cardEl.addEventListener('touchmove', handleTouchMove, { passive: false });
                     cardEl.addEventListener('touchend', handleTouchEnd);
@@ -852,7 +837,6 @@ HTML_PAGE = """
             showToast("Notification", data.message);
             logMessage(`<b>System:</b> ${data.message}`);
             
-            // Smart Audio Routing
             let msg = data.message.toLowerCase();
             if (msg.includes('just say no') || msg.includes('deal breaker') || msg.includes('stole') || msg.includes('snatched') || msg.includes('shattered')) {
                 playSound('alert');
@@ -938,8 +922,8 @@ HTML_PAGE = """
             closeModal();
             showToast("New Game", "The match has been restarted! Let the best Tycoon win.", false);
             playSound('deal');
-            document.getElementById('game-log').innerHTML = ''; // Clear old logs
-            document.getElementById('chat-box').innerHTML = '<div class="text-center text-slate-500 italic text-[10px]">Welcome to the chat! Emote away!</div>'; // Clear old chat
+            document.getElementById('game-log').innerHTML = '';
+            document.getElementById('chat-box').innerHTML = '<div class="text-center text-slate-500 italic text-[10px]">Welcome to the chat! Emote away!</div>';
         });
 
         function updateTimerDisplay() {
@@ -976,7 +960,6 @@ HTML_PAGE = """
             turnDeadline = data.turn_deadline;
             currentTurnName = data.current_turn_name;
             
-            // Hand Draw Animation SFX Trigger
             if (myHandData.length > prevHandCount && prevHandCount !== 0) {
                 playSound('draw');
             }
@@ -987,7 +970,7 @@ HTML_PAGE = """
             if (data.started && !data.game_over) {
                 if(document.getElementById('game-screen').classList.contains('hidden')) {
                     switchScreen('game-screen');
-                    playSound('draw'); // Initial draw sound
+                    playSound('draw');
                 }
 
                 if (myTurn) {
@@ -1002,12 +985,10 @@ HTML_PAGE = """
                 timerInterval = setInterval(updateTimerDisplay, 1000);
             }
 
-            // --- Glowing Turn Indicator Logic ---
             const myBoard = document.getElementById('my-board-container');
             if (myTurn) myBoard.classList.add('player-active-glow');
             else myBoard.classList.remove('player-active-glow');
 
-            // Render Opponents
             let oppHtml = "";
             data.players.forEach(p => {
                 if (p.name.toLowerCase() === myPlayerName.toLowerCase()) return; 
@@ -1026,7 +1007,6 @@ HTML_PAGE = """
                 let propHtml = sortedColors.map(col => {
                     let required = setSizes[col] || 99;
                     let isComplete = propGroups[col].length >= required;
-                    // Mini animation delays for opponent cards
                     let cardsList = propGroups[col].map((item, i) => createMiniCardDOM(item.card, -1, false, i * 40).outerHTML).join('');
                     let bldgs = (p.buildings[col] || []).map(b => createMiniCardDOM(b).outerHTML).join('');
                     
@@ -1039,7 +1019,6 @@ HTML_PAGE = """
                         </div>`;
                 }).join('');
                 
-                // Active Player Glow for Opponent
                 let activeStyle = p.is_turn ? "player-active-glow" : "border-gold-500/30";
                 
                 oppHtml += `
@@ -1056,14 +1035,12 @@ HTML_PAGE = """
             });
             document.getElementById('opponents-container').innerHTML = oppHtml;
 
-            // Render My Hand with Deal Animations
             const handContainer = document.getElementById('my-hand-cards');
             handContainer.innerHTML = "";
             data.my_hand.forEach((c, idx) => {
                 handContainer.appendChild(createCardDOM(c, idx, true, idx * 50));
             });
 
-            // Render My Bank & Properties
             if (meObj) {
                 document.getElementById('my-bank-total').innerText = `${meObj.bank_total}M`;
                 document.getElementById('my-bank-cards').innerHTML = meObj.bank.map((c, i) => createMiniCardDOM(c, -1, false, i*40).outerHTML).join('');
@@ -1487,7 +1464,7 @@ def create_deck():
     return deck
 
 rooms = {} 
-sid_to_room = {}  # Global mapping for quick disconnect processing
+sid_to_room = {}
 
 class GameRoom:
     def __init__(self, room_id, password, game_mode='multiplayer', bot_difficulty='normal'):
@@ -1543,7 +1520,7 @@ class GameRoom:
     def deal_initial_cards(self):
         for sid in self.players: self.draw_cards(sid, 5)
         self.started = True
-        self.current_turn_index = random.randint(0, len(self.turn_order) - 1)  # Randomized start for fairness
+        self.current_turn_index = random.randint(0, len(self.turn_order) - 1)
         self.start_turn()
 
     def start_turn(self):
@@ -1762,8 +1739,6 @@ class GameRoom:
 
                 if not action_played:
                     prop_idx = next((i for i, c in enumerate(bot["hand"]) if c["type"] == "Property"), -1)
-                    
-                    # Update: Bot will only try to bank actual Money cards now
                     money_idx = next((i for i, c in enumerate(bot["hand"]) if c["type"] == "Money"), -1)
 
                     if prop_idx != -1:
@@ -2042,7 +2017,7 @@ def handle_create_room(data):
     game_mode, bot_diff = data.get('game_mode', 'multiplayer'), data.get('bot_difficulty', 'normal')
     rooms[room_id] = GameRoom(room_id, data['password'], game_mode, bot_diff)
     rooms[room_id].add_player(request.sid, data['player_name'])
-    sid_to_room[request.sid] = room_id  # Track room for disconnects
+    sid_to_room[request.sid] = room_id
     join_room(room_id)
     emit('room_joined', {'room_id': room_id, 'is_host': True})
     if game_mode == 'bot':
@@ -2056,7 +2031,7 @@ def handle_join_room(data):
     if room_id not in rooms or rooms[room_id].password != data['password']: return emit('error', {'message': 'Invalid Room ID or Password!'})
     if rooms[room_id].started or rooms[room_id].game_over: return emit('error', {'message': 'Game already started!'})
     rooms[room_id].add_player(request.sid, data['player_name'])
-    sid_to_room[request.sid] = room_id  # Track room for disconnects
+    sid_to_room[request.sid] = room_id
     join_room(room_id)
     emit('room_joined', {'room_id': room_id, 'is_host': False})
     broadcast_room_state(room_id)
@@ -2233,7 +2208,7 @@ def handle_play_card(data):
                                 if not has_house or has_hotel:
                                     player["hand"].append(played_card)
                                     return emit('alert', {'message': "Hotel requires a House first, and max 1 Hotel!"}, room=sid)
-                                    
+                                
                             bldgs.append(played_card)
                             emit('alert', {'message': f"Added {played_card['name']} to your {color_group} set!"}, room=sid)
                         else:
@@ -2423,6 +2398,5 @@ def broadcast_room_state(room_id):
 
 if __name__ == '__main__':
     socketio.start_background_task(background_turn_timer)
-    # FIX 3: Dynamic Port binding for Cloud platforms (Heroku, Render, etc.)
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, debug=False, host='0.0.0.0', port=port)
